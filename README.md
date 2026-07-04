@@ -30,10 +30,10 @@ Built **entirely during the RAISE Summit Hackathon 2026** (Cursor track), clean-
                           ▼
       ┌──────────  the attester  ────────────────┐
       │  MEASURE the geometry, run the suite:     │
-      │  overhang ≤ 45° · min-wall ≥ 2·nozzle ·   │
-      │  clearance ≥ 0.4 mm · retention ≥ 8 N     │
-      │  → per-assertion pass/fail + a scalar     │
-      │    score (passing + least material wins)  │
+      │  overhang ≤ 45° · min-wall ≥ 0.8 mm ·     │
+      │  real 22 mm shelf + 6 mm cable fit ·      │
+      │  fits the plate → per-assertion pass/fail │
+      │  + a score (leanest passing part wins)    │
       └───────────────────┬──────────────────────┘
                  red │            │ green
                      ▼            ▼
@@ -72,10 +72,42 @@ value derived from the part's own parameters. A too-tight slot *fails*.
 > on the roadmap behind a snap-fit part type. Knowing a measurement from an unmodelled force is the
 > point, not a footnote.
 
+## The agentic race
+
+Give the same spec to three independent Claude Code agents and they design it three different ways.
+The part-agnostic attester judges them all — `python -m demo.race`:
+
+| design | verdict | material | vs. naive block |
+|---|:--:|---:|---:|
+| **minimal** — twin-wall + collar ★ | ✅ PASS | **131 mm³** | **80× leaner** |
+| C-clamp — lateral grip | ✅ PASS | 215 mm³ | 49× |
+| hook-over-lip | ✅ PASS | 374 mm³ | 28× |
+| reference block (naive) | ✅ PASS | 10 519 mm³ | 1× |
+
+Same seven assertions green on every one — the attester just ranks by material. Along the way it
+caught the minimal design's collar feathering to a **0.013 mm wall** (min-wall fail); the agent fixed
+it with a closed ring, verified stable across 400→8000 mesh samples. The tests bite, and the agent
+responds. Each design is a `parts/*.py` module exposing the same `make / DEFAULT / probes` contract,
+so the engine never knows which part it's judging.
+
+## Run it
+
+```bash
+uv venv && uv pip install build123d pytest numpy trimesh rtree matplotlib pillow imageio
+source .venv/bin/activate      # then run everything below from the repo root
+python -m pytest -q            # the printability suite (the objective) on the reference clip
+python -m demo.run_demo        # optimize: attester score falls while every check stays green
+python -m demo.repair_demo     # red → green: a broken clip repaired assertion-by-assertion
+python -m demo.race            # the agentic race: 3 agent-authored designs, ranked by the engine
+python -m tools.render artifacts/race/mini_clip.stl   # render any result to PNG + turntable GIF
+```
+
 ## Status
 
-Live build log during the hackathon. Vertical slice first (one part type, real assertions,
-end-to-end), then auto-repair → multi-agent race → certified-tricks gallery.
+Built live during the hackathon. **Done:** the part-agnostic attester (7 real assertions), the
+optimizer (tests as loss function), red→green auto-repair, and the 3-agent race. **Roadmap:** a
+certified-tricks gallery, a snap-fit part type (which makes retention a real assertion), and
+real-print capture.
 
 ## License
 
