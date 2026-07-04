@@ -56,11 +56,21 @@ The tests are the **loss function**. The agents are the **search operators**. Th
 
 ```python
 def test_cable_clip(part, spec):
-    assert part.max_overhang_deg() <= 45          # prints support-free
-    assert part.min_wall_mm()      >= 2 * NOZZLE  # printable walls
-    assert part.clearance_mm("cable") >= 0.4      # cable actually fits
-    assert part.retention_N()      >= 8           # …and is held
+    assert bbox_fits(part, spec.max_bbox_mm)        # fits the build plate
+    assert max_overhang_deg(part) <= 45             # prints support-free
+    assert min_wall_mm(part)      >= spec.min_wall  # printable walls
+    assert 0.15 <= shelf_clearance(part) <= 0.6     # grips the *real* 22 mm shelf
+    assert cable_clearance(part)  >= 0.2            # the *real* 6 mm cable fits
 ```
+
+Every number is measured from real geometry (exact B-rep distance, tessellated-mesh ray-casting,
+face-normal overhang) against a **real-world probe** — a fixed 22 mm shelf, a 6 mm cable — not a
+value derived from the part's own parameters. A too-tight slot *fails*.
+
+> **Honest scope.** Retention ("does it *hold*?") is **not** gated: the reference clip is a slip-fit
+> guide with no interference, so there's no real force to measure — and we refuse to fake one. It's
+> on the roadmap behind a snap-fit part type. Knowing a measurement from an unmodelled force is the
+> point, not a footnote.
 
 ## Status
 

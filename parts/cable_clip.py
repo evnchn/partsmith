@@ -65,20 +65,29 @@ def make(params: dict | None = None) -> Part:
     return bp.part
 
 
-def make_shelf_probe(params: dict | None = None) -> Part:
-    """The shelf tongue, as a solid, at the slot location. Sits inside the slot with clearance."""
+def make_shelf_probe(params: dict | None = None, shelf_nominal_mm: float = 22.0) -> Part:
+    """The REAL shelf tongue as a solid, at the slot location.
+
+    Size is the spec's *nominal* shelf thickness (a fixed real-world 22 mm), NOT derived from the
+    part's `slot_w` — so the measured clearance is the genuine gap the real shelf would see. A
+    too-tight slot (slot_w < nominal) interferes -> clearance 0 -> the assertion fails, as it must.
+    Placement (slot_x) legitimately comes from where the part put its slot.
+    """
     p = {**DEFAULT, **(params or {})}
     with BuildPart() as bp:
         with Locations((p["slot_x"], 0, 0)):
-            # shelf nominal thickness (22) in X, tongue length in Y, slightly shorter in Z
-            Box(p["slot_w"] - 0.4, p["slot_len"], p["H"])
+            Box(shelf_nominal_mm, p["slot_len"], p["H"])
     return bp.part
 
 
-def make_cable_probe(params: dict | None = None) -> Part:
-    """The cable, as a solid, at the bore location. Sits inside the bore with radial clearance."""
+def make_cable_probe(params: dict | None = None, cable_nominal_mm: float = 6.0) -> Part:
+    """The REAL cable as a solid, at the bore location.
+
+    Radius is the spec's nominal cable radius (fixed real-world 6 mm dia), NOT derived from
+    `bore_r`. A bore that's too small interferes -> clearance 0 -> fails. Honest by construction.
+    """
     p = {**DEFAULT, **(params or {})}
     with BuildPart() as bp:
         with Locations((p["bore_x"], 0, 0)):
-            Cylinder(p["bore_r"] - 0.25, p["H"])  # cable radius 3.0 = 6/2
+            Cylinder(cable_nominal_mm / 2.0, p["H"])
     return bp.part

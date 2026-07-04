@@ -67,3 +67,41 @@ class AgentGenerator:
                 "params dict. See ARCHITECTURE.md. Never use `claude -p`."
             )
         return self.spawn(feedback)
+
+
+@dataclass
+class RepairGenerator:
+    """Deterministic repair operator: read the FAILING assertions and nudge the responsible
+    parameter toward passing.
+
+    This is the legible, reliable form of the loop's central idea — a failing test *names* what's
+    wrong, so the fix is directed, not a random walk. It's a runnable stand-in for the agentic
+    repair path (AgentGenerator, where a Claude Code agent reads the same failing rows and rewrites
+    the CAD). Accumulates repairs across rounds via its own `base`.
+    """
+
+    base: dict
+
+    # assertion name -> (param, how to nudge it toward passing)
+    def propose(self, feedback: list | None = None) -> dict:
+        p = dict(self.base)
+        for row in feedback or []:
+            name = row[0]
+            if name == "shelf_clearance_mm":
+                p["slot_w"] = p["slot_w"] + 0.5          # widen the slot so the shelf fits
+            elif name == "cable_clearance_mm":
+                p["bore_r"] = p["bore_r"] + 0.1          # widen the bore so the cable fits
+            elif name == "bbox_x":
+                p["L"] = min(p["L"], 60.0) * 0.98        # shrink to the build volume
+            elif name == "bbox_y":
+                p["W"] = min(p["W"], 60.0) * 0.98
+            elif name == "bbox_z":
+                p["H"] = min(p["H"], 60.0) * 0.98
+            elif name == "min_wall_mm":
+                p["bore_x"] = p["bore_x"] - 0.5          # pull the bore inward, grow the outer wall
+            elif name == "max_overhang_deg":
+                p["H"] = p["H"] + 0.5                    # (topology here is vertical; nudge anyway)
+            elif name == "retention_N":
+                p["wall"] = p["wall"] + 0.3              # thicker flexing wall grips harder
+        self.base = p
+        return p

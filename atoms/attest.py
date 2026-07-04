@@ -46,7 +46,7 @@ def run_suite(part, spec, params: dict) -> AttestResult:
 
     # --- shelf clearance (bounded) ---
     shelf = spec.interface("shelf")
-    shelf_probe = cable_clip.make_shelf_probe(params)
+    shelf_probe = cable_clip.make_shelf_probe(params, shelf.nominal_mm)
     sc = measure.clearance_mm(part, shelf_probe)
     lo, hi = shelf.min_clearance_mm, shelf.max_clearance_mm
     ok_shelf = sc >= lo and (hi is None or sc <= hi)
@@ -54,7 +54,7 @@ def run_suite(part, spec, params: dict) -> AttestResult:
 
     # --- cable clearance (floor) ---
     cable = spec.interface("cable")
-    cable_probe = cable_clip.make_cable_probe(params)
+    cable_probe = cable_clip.make_cable_probe(params, cable.nominal_mm)
     cc = measure.clearance_mm(part, cable_probe)
     rows.append(("cable_clearance_mm", cc >= cable.min_clearance_mm, cc,
                  f">= {cable.min_clearance_mm}"))

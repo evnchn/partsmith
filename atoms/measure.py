@@ -149,7 +149,12 @@ def hole_diameters_mm(part) -> list[float]:
 
 
 def retention_N(part, spec, params: dict) -> float:
-    """PROXY (engineering estimate, NOT a measurement): how hard the cable is held, in newtons.
+    """ROADMAP PROXY — NOT wired into the active suite (see spec: min_retention_N=None).
+
+    Kept to document intent, not to gate on. Retention is only physically real with an
+    interference/snap feature; the slip-fit reference clip has none, so we do NOT assert a force we
+    can't honestly measure. A future snap-fit part type would enable this. Treat the number below as
+    an illustrative engineering estimate only.
 
     Model: the wall of material between the cable bore and the nearest outer edge acts as a short
     fixed beam. Pressing the cable in flexes it by a small assumed elastic pinch `pinch_mm`; the

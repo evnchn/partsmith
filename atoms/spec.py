@@ -62,5 +62,7 @@ CABLE_CLIP = PartSpec(
     support_free=True,
     min_wall_mm=0.8,
     max_bbox_mm=(60.0, 60.0, 60.0),
-    min_retention_N=8.0,
+    # Retention is NOT gated: a slip-fit through-hole guides the cable, it doesn't grip it, so there
+    # is no honest force to assert. A snap/interference variant would set this. We don't fake it.
+    min_retention_N=None,
 )
