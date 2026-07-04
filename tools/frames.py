@@ -1,0 +1,109 @@
+"""Generate the static video frames (title, spec, red->green panels, close).
+
+Dark styled 1280x720 panels via matplotlib (Agg, headless). Content is real (the repair rows are
+the actual demo output). Run:  python -m tools.frames
+"""
+from __future__ import annotations
+
+import os
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
+BG = "#0b0f14"
+FG = "#eef2f6"
+DIM = "#8a97a6"
+CYAN = "#5ac8fa"
+GREEN = "#4ade80"
+RED = "#ff6b6b"
+MONO = {"family": "monospace"}
+W, H = 1280, 720
+OUT = "artifacts"
+
+
+def _canvas():
+    fig = plt.figure(figsize=(W / 160, H / 160), dpi=160, facecolor=BG)
+    ax = fig.add_axes([0, 0, 1, 1]); ax.set_facecolor(BG); ax.axis("off")
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+    return fig, ax
+
+
+def _save(fig, name):
+    os.makedirs(OUT, exist_ok=True)
+    p = os.path.join(OUT, name)
+    fig.savefig(p, facecolor=BG); plt.close(fig)
+    return p
+
+
+def title():
+    fig, ax = _canvas()
+    ax.text(0.5, 0.60, "pytest for atoms", color=CYAN, fontsize=54, ha="center", va="center",
+            fontweight="bold", **MONO)
+    ax.text(0.5, 0.44, "an agentic 3D-modeling factory", color=FG, fontsize=22, ha="center")
+    ax.text(0.5, 0.34, "a part ships only when it passes its own printability tests", color=DIM,
+            fontsize=16, ha="center")
+    return _save(fig, "title.png")
+
+
+def spec_agents():
+    fig, ax = _canvas()
+    ax.text(0.5, 0.78, "you describe a part", color=DIM, fontsize=18, ha="center")
+    ax.text(0.5, 0.66, '"a clip for a 6 mm cable that grips a 22 mm shelf lip,\nprints support-free"',
+            color=FG, fontsize=22, ha="center", **MONO)
+    ax.text(0.5, 0.42, "→ Claude Code agents write build123d", color=CYAN, fontsize=22, ha="center")
+    ax.text(0.5, 0.28, "generating a shape is easy.\ndoes it fit, print, and hold?", color=DIM,
+            fontsize=18, ha="center")
+    return _save(fig, "spec_agents.png")
+
+
+def _repair_panel(name, title_txt, rows, title_color):
+    fig, ax = _canvas()
+    ax.text(0.08, 0.88, title_txt, color=title_color, fontsize=26, ha="left", va="center",
+            fontweight="bold", **MONO)
+    y = 0.72
+    for label, ok, val, target in rows:
+        mark, col = ("✅", GREEN) if ok else ("❌", RED)
+        ax.text(0.10, y, mark, fontsize=20, ha="left", va="center")
+        ax.text(0.16, y, f"{label:<20}", color=FG, fontsize=19, ha="left", va="center", **MONO)
+        ax.text(0.62, y, f"{val:>8}", color=col, fontsize=19, ha="left", va="center", **MONO)
+        ax.text(0.80, y, target, color=DIM, fontsize=16, ha="left", va="center", **MONO)
+        y -= 0.095
+    return _save(fig, name)
+
+
+def repair_frames():
+    before = [
+        ("bbox_x", False, "66.000", "<= 60"),
+        ("shelf_clearance", False, "0.025", "[0.15,0.6]"),
+        ("cable_clearance", False, "0.050", ">= 0.2"),
+        ("max_overhang", True, "0.000", "<= 45"),
+        ("min_wall", True, "2.475", ">= 0.8"),
+    ]
+    after = [
+        ("bbox_x", True, "58.800", "<= 60"),
+        ("shelf_clearance", True, "0.275", "[0.15,0.6]"),
+        ("cable_clearance", True, "0.250", ">= 0.2"),
+        ("max_overhang", True, "0.000", "<= 45"),
+        ("min_wall", True, "2.475", ">= 0.8"),
+    ]
+    a = _repair_panel("repair_before.png", "attest: FAIL  (3 broken)", before, RED)
+    b = _repair_panel("repair_after.png", "repaired: PASS  (all green)", after, GREEN)
+    return a, b
+
+
+def close():
+    fig, ax = _canvas()
+    ax.text(0.5, 0.58, "pytest for atoms", color=CYAN, fontsize=44, ha="center", fontweight="bold",
+            **MONO)
+    ax.text(0.5, 0.44, "from a sentence to a part that provably works", color=FG, fontsize=22,
+            ha="center")
+    ax.text(0.5, 0.30, "github.com/evnchn/pytest-for-atoms", color=DIM, fontsize=18, ha="center",
+            **MONO)
+    return _save(fig, "close.png")
+
+
+if __name__ == "__main__":
+    for p in [title(), spec_agents(), *repair_frames(), close()]:
+        print("wrote", p)
