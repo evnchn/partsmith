@@ -39,9 +39,14 @@ The missing primitive isn't generation. It's a **build-time gate** that proves a
 
 ## Honesty (this is the point, not a caveat)
 - Caliper's clearance probes are the **real-world** shelf/cable, not derived from the part — a
-  too-tight slot genuinely fails.
+  too-tight slot genuinely fails. Clearance is *exact* (OpenCascade); overhang is a face-normal
+  proxy; min-wall is a *sampled* ray-cast, stable across 400→20 000 samples
+  (`demo/min_wall_convergence.py`). These are geometric printability + fit checks, not physical-function proof.
 - **Retention is not faked.** A slip-fit guide has no grip force to measure, so we don't assert one;
   it's explicit roadmap behind a snap-fit part.
+- **The 3-agent race is auditable, not theatrical.** Three Claude Code subagents authored the three
+  designs offline from a shared brief (`docs/AGENT_RACE.md`); the repo ships the static modules + the
+  ranking. The runnable optimizer is parametric — an in-loop agent generator is the roadmap.
 
 ## 60-second storyboard
 See `docs/VOICEOVER.md` for the beat-by-beat narration + timing. Beats: title → agents forge → Caliper

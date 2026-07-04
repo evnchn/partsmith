@@ -116,7 +116,7 @@ NARRATION = {
        "them all against the same seven checks and ranks by material. The minimal clip wins — "
        "every check green, at eighty times less material than the naive block.",
     6: "Out comes a verified part and a manufacturing passport — every claim a measured number.",
-    7: "Partsmith. From a sentence to a part that provably works.",
+    7: "Partsmith. From a sentence to a part that's proven to fit and print.",
 }
 
 # each beat -> list of (visual asset, fraction of the beat's screen time)

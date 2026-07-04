@@ -88,7 +88,10 @@ def _to_trimesh(part):
     verts, tris = part.tessellate(0.1)
     v = np.array([(p.X, p.Y, p.Z) for p in verts], dtype=float)
     f = np.array(tris, dtype=np.int64)
-    return trimesh.Trimesh(vertices=v, faces=f, process=False)
+    # process=True merges the coincident vertices build123d's tessellation emits, so the mesh is
+    # watertight/manifold before we ray-cast into it — a non-welded mesh reads as full of holes and
+    # would make the inward thickness ray-cast unreliable.
+    return trimesh.Trimesh(vertices=v, faces=f, process=True)
 
 
 def min_wall_mm(part, samples: int = 400) -> float:

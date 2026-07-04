@@ -14,14 +14,19 @@ def write_passport(part, spec, result, outdir: str = "artifacts", name: str | No
     os.makedirs(outdir, exist_ok=True)
     name = name or spec.name
     stl = os.path.join(outdir, f"{name}.stl")
+    watertight = None
     try:
+        import trimesh
         from build123d import export_stl
 
         export_stl(part, stl)
+        # a non-watertight (non-manifold) mesh won't slice — verify, don't assume
+        watertight = bool(trimesh.load(stl).is_watertight)
     except Exception as e:  # noqa: BLE001 - report, don't crash the demo
         stl = f"(STL export failed: {e})"
 
     dx, dy, dz = measure.bbox_mm(part)
+    wt = "✅ yes" if watertight else ("❌ no" if watertight is False else "n/a")
     verdict = "PASSES" if result.passed else "FAILS"
     rows = "\n".join(
         f"| {n} | {'✅' if ok else '❌'} | {val:.3f} | {target} |"
@@ -38,7 +43,7 @@ material `{measure.material_mm3(part):.0f} mm³`
 |---|:--:|---|---|
 {rows}
 
-Bounding box: {dx:.1f} × {dy:.1f} × {dz:.1f} mm  ·  STL: `{stl}`
+Bounding box: {dx:.1f} × {dy:.1f} × {dz:.1f} mm  ·  watertight (slicable): {wt}  ·  STL: `{stl}`
 """
     path = os.path.join(outdir, f"{name}_passport.md")
     with open(path, "w") as f:

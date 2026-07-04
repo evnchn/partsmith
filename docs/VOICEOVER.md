@@ -13,7 +13,7 @@ Branding: **Partsmith** (the factory) · **Caliper** (its verification engine). 
 | 4 | 28–38 | `score_chart.png` | "The checks aren't just a gate — they're the optimization target. Partsmith keeps searching, cutting material by a third while every check stays green." | checks = the loss function |
 | 5 | 38–52 | `leaderboard.png` | "Give the same spec to three agents and they solve it three different ways. Caliper judges them all against the same seven checks and ranks by material. The minimal clip wins — every check green, at eighty times less material than the naive block." | one spec · three agents · Caliper ranks by material |
 | 6 | 52–58 | `winner_turntable.gif` + `passport.png` | "Out comes a verified part and a manufacturing passport — every claim a measured number." | verified part + passport |
-| 7 | 58–60 | `close.png` | "**Partsmith.** From a sentence to a part that provably works." | github.com/evnchn/partsmith |
+| 7 | 58–60 | `close.png` | "**Partsmith.** From a sentence to a part that's proven to fit and print." | github.com/evnchn/partsmith |
 
 ## Notes for the assembler
 - Frames 3/5/6 are the highest-value — most screen time.

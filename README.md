@@ -5,8 +5,8 @@
 printable.** Verification isn't an afterthought: it's the **optimization target** the agents design
 against, which turns generative CAD from a dice-roll into an engineering loop.
 
-> Generating a mesh is easy. Generating a part that **provably fits, prints support-free, and holds**
-> is the hard part. So Partsmith makes "does it actually work?" checkable — measured, not eyeballed.
+> Generating a mesh is easy. Generating one that **provably fits and prints support-free** is the
+> hard part. So Partsmith makes "will it print, and will it fit?" checkable — measured, not eyeballed.
 
 Built **entirely during the RAISE Summit Hackathon 2026** (Cursor track), clean-room. 🇫🇷
 
@@ -77,6 +77,12 @@ Exact B-rep distance (OpenCascade), tessellated-mesh ray-casting, face-normal ov
 run against a **real-world probe** (a fixed 22 mm shelf, a 6 mm cable), not a value derived from the
 part's own parameters. A too-tight slot *fails*.
 
+**What each check is (no overclaiming):** clearance is *exact* (OpenCascade distance); overhang is a
+per-face **normal proxy**; min-wall is a **sampled** inward ray-cast on the watertight mesh — stable
+across 400→20 000 samples (`python -m demo.min_wall_convergence`), a solid heuristic, not a certified
+gauge. The exported STL is checked **watertight / slicable** in the passport. These are geometric
+printability + fit checks — not a claim of physical function.
+
 > **Honest scope.** Retention ("does it *hold*?") is **not** gated: the reference clip is a slip-fit
 > guide with no interference, so there's no real force to measure — and Partsmith won't fake one. It's
 > on the roadmap behind a snap-fit part. Knowing a measurement from an unmodelled force is the point.
@@ -95,9 +101,17 @@ Caliper judges them all — `python -m demo.race`:
 
 Same seven checks green on every one — Caliper just ranks by material. Along the way it caught the
 minimal design's collar feathering to a **0.013 mm wall** (min-wall fail); the agent fixed it with a
-closed ring, verified stable across 400→8000 mesh samples. The checks bite, and the agent responds.
-Each design is a `parts/*.py` module exposing the same `make / DEFAULT / probes` contract, so Caliper
-never knows which part it's judging.
+closed ring (`demo/min_wall_convergence.py` shows the final wall stable across 400→20 000 samples).
+The checks bite, and the agent responds. Each design is a `parts/*.py` module exposing the same
+`make / DEFAULT / probes` contract, so Caliper never knows which part it's judging.
+
+> **Provenance (honest).** The three designs were authored by three separate Claude Code subagents
+> during the build, from the shared brief in [`docs/AGENT_RACE.md`](docs/AGENT_RACE.md) — the repo
+> ships the resulting static `parts/*.py` modules and Caliper's ranking, **not** a live
+> agent-spawning loop. `demo/run_demo.py`'s optimizer tunes a design's *parameters*
+> (`ParametricGenerator`); wiring a Claude Code agent as the in-loop generator (`AgentGenerator`, a
+> documented hook in `factory/generate.py`) is the next integration, not something this repo claims to
+> already do at runtime.
 
 ## Run it
 

@@ -98,8 +98,8 @@ def close():
     fig, ax = _canvas()
     ax.text(0.5, 0.58, "Partsmith", color=CYAN, fontsize=44, ha="center", fontweight="bold",
             **MONO)
-    ax.text(0.5, 0.44, "from a sentence to a part that provably works", color=FG, fontsize=22,
-            ha="center")
+    ax.text(0.5, 0.44, "from a sentence to a part that's proven to fit and print", color=FG,
+            fontsize=19, ha="center")
     ax.text(0.5, 0.30, "github.com/evnchn/partsmith", color=DIM, fontsize=18, ha="center",
             **MONO)
     return _save(fig, "close.png")
