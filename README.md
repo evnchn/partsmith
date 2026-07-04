@@ -83,9 +83,26 @@ def check(part, spec):                              # every number MEASURED from
 ```
 
 Exact B-rep distance (OpenCascade), tessellated-mesh ray-casting, face-normal overhang — each check
-run against a **real-world probe** (a fixed 22 mm shelf, a 6 mm cable), not a value derived from the
-part's own parameters. A too-tight slot *fails*. *(Full methodology & honest limitations: the
-[appendix](#methodology--limitations) below.)*
+run against a **real-world probe**: a solid sized from the *nominal* interface (a 22 mm shelf, a 6 mm
+cable), placed at the part's declared feature location. A too-tight slot *fails*. *(Full methodology &
+honest limitations — including what the probe frame does and doesn't anchor — in the
+[appendix](#methodology--limitations).)*
+
+### The gate bites
+
+A verifier is only worth something if it **rejects**. `python -m demo.adversarial` — four
+plausible-looking clips, each with one hidden defect:
+
+```text
+defect                                     verdict  caught by            value
+wall too thin — bore crowds the edge       REJECT   min_wall_mm          0.160
+slot too tight — 22 mm shelf won't fit     REJECT   shelf_clearance_mm   0.000
+bore too small — 6 mm cable won't fit      REJECT   cable_clearance_mm   0.050
+too big for the build plate                REJECT   bbox_x               70.000
+```
+
+Each defect is caught by its specific check, with the measured number — before a printer runs. That's
+what makes a green result mean something.
 
 ## The agentic race
 
@@ -150,8 +167,12 @@ real-print capture.
 Honest about exactly what Caliper measures and what it doesn't — a verification tool that overclaims
 is a contradiction.
 
-- **Clearance — exact.** Minimum solid-to-solid distance via OpenCascade `BRepExtrema`, against a
-  *real-world* probe (a fixed 22 mm shelf, a 6 mm cable), not a value derived from the part.
+- **Clearance — exact, but frame-relative.** Minimum solid-to-solid distance via OpenCascade
+  `BRepExtrema`. The probe is *sized* from the real-world nominal (22 mm shelf, 6 mm cable), so a
+  too-tight slot genuinely fails — but it's *placed* at the part's own declared feature, not in an
+  independent world frame, and it measures gap **magnitude** at that pose, not an assembly path. So a
+  uniformly translated design still passes, and a slot that *encloses* rather than *admits* the shelf
+  reads the same gap. Anchoring interfaces to spec-fixed relative positions is roadmap.
 - **Overhang — a per-face normal proxy.** Face-normal angle vs. the build plate, bed faces excluded.
   Answers the support-free question; not a slicer-grade bridging/island analysis.
 - **Min-wall — a *sampled* inward ray-cast** on the watertight mesh; stable across 400→20 000 samples
