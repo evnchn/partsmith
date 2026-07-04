@@ -1,12 +1,12 @@
 # Partsmith
 
 **Agents that forge parts that fit.** Describe a part in plain language; Claude Code agents write
-[build123d](https://github.com/gumyr/build123d) to make it — and it **only ships once it's verified
-printable.** Verification isn't an afterthought: it's the **optimization target** the agents design
+[build123d](https://github.com/gumyr/build123d) to make it — and it **only ships once it clears
+Caliper's printability checks.** Verification isn't an afterthought: it's the **optimization target** the agents design
 against, which turns generative CAD from a dice-roll into an engineering loop.
 
-> Generating a mesh is easy. Generating one that **provably fits and prints support-free** is the
-> hard part. So Partsmith makes "will it print, and will it fit?" checkable — measured, not eyeballed.
+> Generating a mesh is easy. Generating one that **provably fits and passes the support-free check** is
+> the hard part. So Partsmith makes "will it print, and will it fit?" checkable — measured, not eyeballed.
 
 Built **entirely during the RAISE Summit Hackathon 2026** (Cursor track), clean-room. 🇫🇷
 

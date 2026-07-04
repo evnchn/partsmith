@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Partsmith — physics-verified generative CAD</title>
-<meta name="description" content="Partsmith is building physics-verified generative CAD. Describe a part, agents forge it in build123d, and Caliper proves it prints — measured, not eyeballed.">
+<title>Partsmith — generative CAD, gated by Caliper</title>
+<meta name="description" content="Partsmith: agents forge a part in build123d, and Caliper gates it on measured geometry — overhang, wall, fit — so what ships passes its printability checks. The first pillar of physics-verified CAD.">
 <style>
   :root{
     --bg:#0b0f14; --surface:#121821; --surface-2:#0e141b;
@@ -149,8 +149,8 @@
     <div>
       <div class="eyebrow">Agentic 3D-modeling factory · RAISE Summit 2026 · Cursor track</div>
       <h1>Partsmith</h1>
-      <p class="thesis">Physics-verified generative CAD — where the AI <span class="accent">can't hand you a part that fails.</span></p>
-      <p class="sub">Describe a part. Claude&nbsp;Code agents forge it in <span class="num">build123d</span>. <b>Caliper</b> proves it prints — <em>measured, not eyeballed</em>. What comes out is provably printable, not a hopeful mesh.</p>
+      <p class="thesis">Generative CAD, <span class="accent">with a gate.</span> Agents forge the part; Caliper proves it passes the fit &amp; printability checks — before it ships.</p>
+      <p class="sub">Describe a part. Claude&nbsp;Code agents forge it in <span class="num">build123d</span>. <b>Caliper</b> gates it on real geometry — overhang, wall, fit — so what ships <em>passes its checks</em>, not just looks right. The proven first pillar of <em>physics-verified</em> CAD.</p>
       <div class="cta">
         <a class="btn primary" href="#demo">▶ Watch the 60&#8209;second demo</a>
         <a class="btn" href="https://github.com/evnchn/partsmith">View the repo ↗</a>
@@ -205,7 +205,7 @@
   </div>
   <div class="shot" style="margin-top:22px">
     <img src="assets/leaderboard.png" alt="Race leaderboard: reference block 10519 mm³, hook-over-lip 374 mm³, C-clamp 215 mm³, minimal clip (winner) 131 mm³ / 80× leaner — all four PASS.">
-    <div class="m">Every design is a module exposing the same <span class="num">make / probes</span> contract, so Caliper never knows <em>which</em> part it's judging — it just measures.</div>
+    <div class="m">The three designs were authored offline by separate Claude&nbsp;Code agents during the build; the repo ships the resulting modules and this ranking. Each exposes the same <span class="num">make / probes</span> contract, so Caliper never knows <em>which</em> part it's judging — it just measures.</div>
   </div>
 </div></section>
 
@@ -221,7 +221,7 @@
     </div>
     <div class="shot">
       <img src="assets/tipover_stable.png" alt="Top-down stability plan: centre-of-mass dot inside the green support polygon — stable.">
-      <div class="m"><b class="pass">Stable.</b> Centre of mass inside the support footprint — it won't topple.</div>
+      <div class="m"><b class="pass">Stable.</b> Centre of mass inside the support footprint — it passes the static stability check.</div>
     </div>
     <div class="shot">
       <img src="assets/tipover_topple.png" alt="Top-down stability plan: tipped part, centre-of-mass off the pivot line — topples.">
@@ -232,7 +232,7 @@
 
 <section id="road" style="padding-top:24px"><div class="wrap">
   <h2 class="sec">Proven today. Building next.</h2>
-  <p class="lead sec-lead">Geometry is the gate we've shipped. Physics is the gate we're building — the same architecture, richer fields. This is the trajectory, stated plainly.</p>
+  <p class="lead sec-lead">Geometry is the gate we've shipped. Physics is the gate we're building — the same architecture, richer fields.</p>
   <div class="shot" style="overflow-x:auto">
   <table class="spec">
     <thead><tr><th>✅ Proven today · runs green in the repo</th><th>🔜 Building next · same architecture</th></tr></thead>

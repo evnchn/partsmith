@@ -6,19 +6,19 @@ Judging: **Demo 50% · Impact 25% · Creativity 15% · Pitch 10%.**
 ---
 
 ## One-liner (for the form)
-**Partsmith is building physics-verified generative CAD — where the AI can't hand you a part that
-fails.** The first pillar ships today: describe a part, Claude Code agents forge it in build123d, and
-**Caliper** gates it on *measured* geometry — overhang, wall thickness, real-world fit — so what comes
-out is provably printable, not a hopeful mesh. Three agents race the same spec; Caliper crowns the
-leanest design that passes (80× less material than a naive block). Generative CAD stops being a
-dice-roll and becomes an engineering loop.
+**Partsmith puts a gate on generative CAD — agents forge the part, and it ships only once Caliper
+proves it passes the fit &amp; printability checks.** Describe a part; Claude Code agents write
+build123d; **Caliper** gates it on *measured* geometry — overhang, wall thickness, real-world fit — so
+what comes out passes its checks, not just looks right. Three agents race the same spec; Caliper crowns
+the leanest design that passes (80× less material than a naive block). Generative CAD stops being a
+dice-roll and becomes an engineering loop — the proven first pillar of physics-verified CAD.
 
 ## Proven today / Building next
 | ✅ Proven today (this repo, runs green) | 🔜 Building next (same architecture) |
 |---|---|
 | Caliper gates generated parts on real geometry — overhang, wall, fit, plate | Structural & flow verification (FEA/CFD) — the same gate, physics fields |
 | Red→green auto-repair; optimize to the leanest passing part | Live agent-in-the-loop generation (the 3-agent race, wired continuously) |
-| 3 Claude Code agents race one spec; Caliper ranks the winner | Agent-readable heat-map fields (overhang/thickness) driving redesign |
+| 3 Claude Code agents race one spec; Caliper ranks the winner; heat-map fields rendered (advisory) | The closed loop: an agent reads those heat-map fields and mutates geometry to clear them |
 
 *Geometry is the gate we've shipped. Physics is the gate we're building — the trajectory, not a caveat.*
 
