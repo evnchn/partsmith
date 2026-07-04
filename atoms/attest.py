@@ -1,6 +1,6 @@
 """The attester: run the printability suite as data and score the result.
 
-`run_suite(part, spec, params)` measures the real geometry, evaluates every spec-derived
+`run_suite(part, spec, params, probes)` measures the real geometry, evaluates every spec-derived
 assertion, and returns an `AttestResult`. This is the same objective the pytest suite checks — one
 callable for the optimizer loop, one parametrized suite for humans/CI. `score` is designed so
 lower is better: a big penalty per failing assertion plus the sum of the minimize targets, so a
@@ -22,9 +22,11 @@ class AttestResult:
     score: float
 
 
-def run_suite(part, spec, params: dict) -> AttestResult:
-    from parts import cable_clip
-
+def run_suite(part, spec, params: dict, probes: dict) -> AttestResult:
+    """Attest a part against its spec. `probes` maps each `spec.interface` name to the
+    real-world mating solid (from `part_module.probes(params, spec)`) — this is what keeps the
+    attester PART-AGNOSTIC: it never imports a specific part, it just measures the gap to the
+    probe the part module handed it."""
     rows: list[tuple[str, bool, float, str]] = []
 
     # --- bounding box fits ---
@@ -44,20 +46,13 @@ def run_suite(part, spec, params: dict) -> AttestResult:
     mw = measure.min_wall_mm(part)
     rows.append(("min_wall_mm", mw >= spec.min_wall_mm, mw, f">= {spec.min_wall_mm}"))
 
-    # --- shelf clearance (bounded) ---
-    shelf = spec.interface("shelf")
-    shelf_probe = cable_clip.make_shelf_probe(params, shelf.nominal_mm)
-    sc = measure.clearance_mm(part, shelf_probe)
-    lo, hi = shelf.min_clearance_mm, shelf.max_clearance_mm
-    ok_shelf = sc >= lo and (hi is None or sc <= hi)
-    rows.append(("shelf_clearance_mm", ok_shelf, sc, f"[{lo}, {hi}]"))
-
-    # --- cable clearance (floor) ---
-    cable = spec.interface("cable")
-    cable_probe = cable_clip.make_cable_probe(params, cable.nominal_mm)
-    cc = measure.clearance_mm(part, cable_probe)
-    rows.append(("cable_clearance_mm", cc >= cable.min_clearance_mm, cc,
-                 f">= {cable.min_clearance_mm}"))
+    # --- interface clearances (part-agnostic: one row per spec interface) ---
+    for iface in spec.interfaces:
+        sc = measure.clearance_mm(part, probes[iface.name])
+        lo, hi = iface.min_clearance_mm, iface.max_clearance_mm
+        ok = sc >= lo and (hi is None or sc <= hi)
+        target = f">= {lo}" if hi is None else f"[{lo}, {hi}]"
+        rows.append((f"{iface.name}_clearance_mm", ok, sc, target))
 
     # --- retention ---
     if spec.min_retention_N is not None:

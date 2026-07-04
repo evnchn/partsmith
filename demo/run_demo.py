@@ -21,7 +21,8 @@ def main() -> None:
         raise SystemExit("parts.cable_clip.DEFAULT is missing — cannot seed the optimizer.")
 
     gen = ParametricGenerator(base=base, scale=0.10)
-    best, history = optimize(spec, gen, rounds=6, per_round=8, seed_params=base)
+    best, history = optimize(spec, gen, rounds=6, per_round=8, seed_params=base,
+                             part_module=cable_clip)
 
     print("round-by-round best (score = attester loss; lower is better):")
     for i, c in enumerate(history):

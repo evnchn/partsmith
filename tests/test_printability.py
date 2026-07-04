@@ -29,7 +29,7 @@ def test_min_wall(part, spec):
 
 def test_shelf_clearance(part, spec, params):
     iface = spec.interface("shelf")
-    probe = cable_clip.make_shelf_probe(params)
+    probe = cable_clip.probes(params, spec)["shelf"]
     c = measure.clearance_mm(part, probe)
     assert c >= iface.min_clearance_mm, f"shelf clearance {c:.3f} mm < {iface.min_clearance_mm} mm (too tight)"
     assert iface.max_clearance_mm is None or c <= iface.max_clearance_mm, \
@@ -38,7 +38,7 @@ def test_shelf_clearance(part, spec, params):
 
 def test_cable_clearance(part, spec, params):
     iface = spec.interface("cable")
-    probe = cable_clip.make_cable_probe(params)
+    probe = cable_clip.probes(params, spec)["cable"]
     c = measure.clearance_mm(part, probe)
     assert c >= iface.min_clearance_mm, f"cable clearance {c:.3f} mm < {iface.min_clearance_mm} mm (won't fit)"
 

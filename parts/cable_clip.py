@@ -91,3 +91,16 @@ def make_cable_probe(params: dict | None = None, cable_nominal_mm: float = 6.0) 
         with Locations((p["bore_x"], 0, 0)):
             Cylinder(cable_nominal_mm / 2.0, p["H"])
     return bp.part
+
+
+def probes(params: dict, spec) -> dict:
+    """The part-agnostic contract: map each spec interface name -> its real-world probe solid,
+    sized from the interface's nominal and placed at this part's actual feature location.
+
+    This is what lets the attester stay decoupled from any specific part — it asks the part
+    module for its probes rather than knowing how to build them.
+    """
+    return {
+        "shelf": make_shelf_probe(params, spec.interface("shelf").nominal_mm),
+        "cable": make_cable_probe(params, spec.interface("cable").nominal_mm),
+    }

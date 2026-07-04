@@ -17,7 +17,9 @@ BROKEN = {**cable_clip.DEFAULT, "slot_w": 22.05, "bore_r": 3.05, "L": 66.0}
 
 
 def attest(params: dict):
-    return run_suite(cable_clip.make(params), CABLE_CLIP, params)
+    part = cable_clip.make(params)
+    probes = cable_clip.probes(params, CABLE_CLIP)
+    return run_suite(part, CABLE_CLIP, params, probes)
 
 
 def show(tag: str, res) -> None:

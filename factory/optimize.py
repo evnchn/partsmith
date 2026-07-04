@@ -27,17 +27,22 @@ class Candidate:
         return self.result.passed
 
 
-def evaluate(params: dict, spec, make=cable_clip.make) -> Candidate | None:
-    """Build + attest one candidate. Infeasible geometry -> None (dropped from the race)."""
+def evaluate(params: dict, spec, part_module=cable_clip) -> Candidate | None:
+    """Build + attest one candidate. Infeasible geometry -> None (dropped from the race).
+
+    `part_module` is any module exposing make/DEFAULT/probes — the optimizer is part-agnostic.
+    """
     try:
-        part = make(params)
-        res = run_suite(part, spec, params)
+        part = part_module.make(params)
+        probes = part_module.probes(params, spec)
+        res = run_suite(part, spec, params, probes)
         return Candidate(params, res)
     except Exception:
         return None
 
 
-def optimize(spec, generator, *, rounds: int = 6, per_round: int = 6, seed_params: dict | None = None):
+def optimize(spec, generator, *, rounds: int = 6, per_round: int = 6,
+             seed_params: dict | None = None, part_module=cable_clip):
     """Race `per_round` candidates for `rounds`; return (best, history).
 
     Best = lowest-score PASSING candidate; if none pass yet, the closest (lowest score) is kept
@@ -47,7 +52,7 @@ def optimize(spec, generator, *, rounds: int = 6, per_round: int = 6, seed_param
     best: Candidate | None = None
 
     if seed_params is not None:
-        best = evaluate(seed_params, spec)
+        best = evaluate(seed_params, spec, part_module)
         if best is not None:
             history.append(best)
 
@@ -55,7 +60,7 @@ def optimize(spec, generator, *, rounds: int = 6, per_round: int = 6, seed_param
         feedback = None if best is None else [r for r in best.result.rows if not r[1]]
         pool: list[Candidate] = [best] if best is not None else []
         for _ in range(per_round):
-            c = evaluate(generator.propose(feedback=feedback), spec)
+            c = evaluate(generator.propose(feedback=feedback), spec, part_module)
             if c is not None:
                 pool.append(c)
         if not pool:

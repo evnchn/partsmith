@@ -12,6 +12,9 @@ dependencies = [
     "rtree>=1.0",  # ray backend for measure.min_wall_mm inward ray-casting
 ]
 
+[project.optional-dependencies]
+render = ["matplotlib>=3.8", "pillow>=10", "imageio>=2.30"]  # tools/render.py demo visuals
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
