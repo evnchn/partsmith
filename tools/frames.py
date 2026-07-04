@@ -39,7 +39,7 @@ def _save(fig, name):
 
 def title():
     fig, ax = _canvas()
-    ax.text(0.5, 0.60, "pytest for atoms", color=CYAN, fontsize=54, ha="center", va="center",
+    ax.text(0.5, 0.60, "Partsmith", color=CYAN, fontsize=54, ha="center", va="center",
             fontweight="bold", **MONO)
     ax.text(0.5, 0.44, "an agentic 3D-modeling factory", color=FG, fontsize=22, ha="center")
     ax.text(0.5, 0.34, "a part ships only when it passes its own printability tests", color=DIM,
@@ -96,11 +96,11 @@ def repair_frames():
 
 def close():
     fig, ax = _canvas()
-    ax.text(0.5, 0.58, "pytest for atoms", color=CYAN, fontsize=44, ha="center", fontweight="bold",
+    ax.text(0.5, 0.58, "Partsmith", color=CYAN, fontsize=44, ha="center", fontweight="bold",
             **MONO)
     ax.text(0.5, 0.44, "from a sentence to a part that provably works", color=FG, fontsize=22,
             ha="center")
-    ax.text(0.5, 0.30, "github.com/evnchn/pytest-for-atoms", color=DIM, fontsize=18, ha="center",
+    ax.text(0.5, 0.30, "github.com/evnchn/partsmith", color=DIM, fontsize=18, ha="center",
             **MONO)
     return _save(fig, "close.png")
 

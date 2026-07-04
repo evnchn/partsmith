@@ -1,8 +1,8 @@
-"""Assemble the 60-second demo video for pytest-for-atoms.
+"""Assemble the 60-second demo video for Partsmith (verification engine: Caliper).
 
 Builds two remaining frames (manufacturing passport + a corrected leaderboard), synthesizes the
 seven-beat narration with macOS `say`, and muxes everything with ffmpeg into
-`artifacts/pytest_for_atoms_demo.mp4`.
+`artifacts/partsmith_demo.mp4`.
 
 Every on-screen number comes from the real attester (see demo/race.py, demo/repair_demo.py); the
 narration is kept honest against that output. Run:  .venv/bin/python -m tools.video
@@ -72,7 +72,7 @@ def leaderboard():
     ref = mats["cable_clip"]
 
     fig = plt.figure(figsize=(W / 160, H / 160), dpi=160, facecolor=BG)
-    fig.text(0.5, 0.955, "one spec · three agents · all pass · the attester ranks by material",
+    fig.text(0.5, 0.955, "one spec · three agents · Caliper ranks by material",
              color=FG, fontsize=16, ha="center", va="center")
 
     # manual 2x2 grid in figure coords (auto subplot layout scrambles the labels)
@@ -103,20 +103,20 @@ def leaderboard():
 # Honest against demo/race.py + demo/repair_demo.py output (all 4 designs PASS; winner=mini_clip,
 # 80.6× leaner; optimize 13,149 -> 8,654 = -34% material). No "it rejects" claim — nothing rejects.
 NARRATION = {
-    1: "This is pytest for atoms — an agentic 3D modeling factory. It only ships a part once it "
-       "passes its own printability tests.",
-    2: "You describe a part in plain language, and Claude Code agents write the CAD. Generating a "
-       "shape is easy — but does it actually fit, print, and hold?",
-    3: "So we made it a test suite — overhang, wall thickness, real world fit — every check a "
-       "number measured from the geometry. Here a broken clip fails three. The loop fixes each "
-       "one and re-attests until every assertion is green.",
-    4: "The tests aren't just a gate — they're the optimization target. The factory keeps "
+    1: "This is Partsmith — an agentic 3D-modeling factory. Describe a part, and it forges one "
+       "that's verified printable.",
+    2: "You describe a part in plain language; Claude Code agents write the CAD in build123d. But "
+       "generating a shape is easy — the real question is: does it fit, print, and hold?",
+    3: "So Partsmith Caliper measures it — overhang, wall thickness, real-world fit, every check a "
+       "number from the geometry. Here a broken clip fails three checks; the loop reads each "
+       "failure, fixes exactly that, and re-checks until every one is green.",
+    4: "The checks aren't just a gate — they're the optimization target. Partsmith keeps "
        "searching, cutting material by a third while every check stays green.",
-    5: "Give the same spec to three agents and they solve it three different ways. The attester "
-       "judges them all against the same seven checks and ranks by material. The minimal clip "
-       "wins — every assertion green, at eighty times less material than the naive block.",
+    5: "Give the same spec to three agents and they solve it three different ways. Caliper judges "
+       "them all against the same seven checks and ranks by material. The minimal clip wins — "
+       "every check green, at eighty times less material than the naive block.",
     6: "Out comes a verified part and a manufacturing passport — every claim a measured number.",
-    7: "pytest for atoms. From a sentence to a part that provably works.",
+    7: "Partsmith. From a sentence to a part that provably works.",
 }
 
 # each beat -> list of (visual asset, fraction of the beat's screen time)
@@ -206,7 +206,7 @@ def build():
     _run([FFMPEG, "-y", "-f", "concat", "-safe", "0", "-i", vlist, "-c", "copy", video_cat])
     _run([FFMPEG, "-y", "-f", "concat", "-safe", "0", "-i", alist, "-c", "copy", audio_cat])
 
-    final = os.path.join(OUT, "pytest_for_atoms_demo.mp4")
+    final = os.path.join(OUT, "partsmith_demo.mp4")
     _run([FFMPEG, "-y", "-i", video_cat, "-i", audio_cat, "-c:v", "copy", "-c:a", "aac",
           "-shortest", final])
 
