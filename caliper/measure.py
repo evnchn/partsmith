@@ -131,6 +131,48 @@ def min_wall_mm(part, samples: int = 400) -> float:
     return float(dist.min())
 
 
+def wall_thickness_field(part, samples: int = 2000):
+    """Full local-wall-thickness field over the surface (NOT just the minimum).
+
+    Same inward ray-cast as `min_wall_mm` (sample surface points + outward normals, nudge inside,
+    cast a ray inward, take the nearest forward hit as local thickness) — but returns EVERY sampled
+    point and its thickness instead of collapsing to the minimum. This is what a heatmap renders:
+    an agent reads the thin (red) zones off the picture instead of a single scalar.
+
+    Returns `(points Nx3, thickness N)` for the samples that produced a positive inward hit.
+    `min_wall_mm` is intentionally left untouched; this is an additive sibling. Raises (never
+    fabricates) if no ray backend is available / the mesh casts no hits.
+    """
+    import trimesh
+
+    mesh = _to_trimesh(part)
+    try:
+        pts, face_idx = trimesh.sample.sample_surface(mesh, samples, seed=0)  # deterministic
+    except TypeError:
+        pts, face_idx = trimesh.sample.sample_surface(mesh, samples)
+    normals = mesh.face_normals[face_idx]
+
+    eps = 1e-3
+    origins = pts - normals * eps      # nudge just inside the surface
+    directions = -normals              # cast inward
+
+    locations, index_ray, _ = mesh.ray.intersects_location(
+        origins, directions, multiple_hits=False
+    )
+    if len(locations) == 0:
+        raise RuntimeError(
+            "wall_thickness_field: ray-caster returned no hits — cannot measure wall thickness. "
+            "Install a ray backend (`uv pip install rtree`) or check the mesh is watertight."
+        )
+    dist = np.linalg.norm(locations - origins[index_ray], axis=1)
+    good = dist > 1e-6
+    hit_pts = pts[index_ray][good]     # the surface points that produced a real inward hit
+    hit_thk = dist[good]
+    if hit_thk.size == 0:
+        raise RuntimeError("wall_thickness_field: no positive-distance hits — degenerate measurement.")
+    return np.asarray(hit_pts, dtype=float), np.asarray(hit_thk, dtype=float)
+
+
 def hole_diameters_mm(part) -> list[float]:
     """Best-effort diameters of cylindrical faces (mm). Returns [] if none/unreliable.
 

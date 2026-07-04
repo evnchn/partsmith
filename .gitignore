@@ -11,4 +11,7 @@ dist/
 # generated candidates + artifacts kept out of history unless promoted
 parts/_candidates/
 artifacts/
+OVERNIGHT_LOG.md
+docs/site_selfcontained.html
+.playwright-mcp/
 !parts/cable_clip.py

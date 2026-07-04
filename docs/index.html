@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partsmith — physics-verified generative CAD</title>
+<meta name="description" content="Partsmith is building physics-verified generative CAD. Describe a part, agents forge it in build123d, and Caliper proves it prints — measured, not eyeballed.">
+<style>
+  :root{
+    --bg:#0b0f14; --surface:#121821; --surface-2:#0e141b;
+    --line:#22303d; --ink:#eef2f6; --dim:#8a97a6; --accent:#5ac8fa;
+    --pass:#4ade80; --fail:#ff6b6b; --warn:#f6c453;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+    --maxw:1080px; --r:10px;
+  }
+  @media (prefers-color-scheme:light){
+    :root{ --bg:#eef2f5; --surface:#ffffff; --surface-2:#e7edf1; --line:#cdd8e0;
+      --ink:#0b1219; --dim:#5a6672; --accent:#0a7fc2; --pass:#16a34a; --fail:#dc2626; --warn:#b7791f; }
+  }
+  :root[data-theme="dark"]{ --bg:#0b0f14; --surface:#121821; --surface-2:#0e141b; --line:#22303d;
+    --ink:#eef2f6; --dim:#8a97a6; --accent:#5ac8fa; --pass:#4ade80; --fail:#ff6b6b; --warn:#f6c453; }
+  :root[data-theme="light"]{ --bg:#eef2f5; --surface:#ffffff; --surface-2:#e7edf1; --line:#cdd8e0;
+    --ink:#0b1219; --dim:#5a6672; --accent:#0a7fc2; --pass:#16a34a; --fail:#dc2626; --warn:#b7791f; }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  a{color:var(--accent);text-decoration:none}
+  h1,h2,h3{font-family:var(--mono);font-weight:600;letter-spacing:-.01em;text-wrap:balance;line-height:1.1}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+  .pass{color:var(--pass)} .fail{color:var(--fail)} .accent{color:var(--accent)}
+
+  /* dimension-line divider motif */
+  .dim-rule{display:flex;align-items:center;gap:14px;color:var(--dim);margin:0;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  .dim-rule::before,.dim-rule::after{content:"";height:1px;background:var(--line);flex:1}
+  .dim-rule::before{box-shadow:0 -3px 0 -2px var(--line),0 3px 0 -2px var(--line)}
+  .dim-rule::after{box-shadow:0 -3px 0 -2px var(--line),0 3px 0 -2px var(--line)}
+
+  header.top{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);
+    background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom:1px solid var(--line)}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .brand{font-family:var(--mono);font-weight:600;letter-spacing:-.02em;font-size:18px}
+  .brand .tick{color:var(--accent)}
+  .nav{display:flex;gap:22px;align-items:center;font-size:14px}
+  .nav a{color:var(--dim)} .nav a:hover{color:var(--ink)}
+  .toggle{background:var(--surface);border:1px solid var(--line);color:var(--dim);
+    border-radius:8px;padding:6px 9px;cursor:pointer;font-family:var(--mono);font-size:12px}
+  @media(max-width:680px){.nav .hide-sm{display:none}}
+
+  section{padding:76px 0}
+  .lead{font-size:15px;color:var(--dim);max-width:62ch}
+
+  /* HERO */
+  .hero{padding:64px 0 40px}
+  .hero h1{font-size:clamp(48px,9vw,104px);margin:.1em 0 .12em;letter-spacing:-.03em}
+  .thesis{font-family:var(--mono);font-size:clamp(19px,2.6vw,27px);line-height:1.28;color:var(--ink);max-width:20ch;margin:0 0 18px}
+  .thesis .accent{white-space:nowrap}
+  .hero .sub{font-size:16px;color:var(--dim);max-width:56ch;margin:0 0 26px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{font-family:var(--mono);font-size:14px;border-radius:8px;padding:11px 16px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink);cursor:pointer;transition:.15s;display:inline-flex;gap:8px;align-items:center}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .btn.primary{background:var(--accent);color:#04121c;border-color:var(--accent);font-weight:600}
+  :root[data-theme="light"] .btn.primary{color:#fff}
+  @media (prefers-color-scheme:light){.btn.primary{color:#fff}}
+
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+  @media(max-width:820px){.hero-grid{grid-template-columns:1fr;gap:28px}}
+  .gatecard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;position:relative}
+  .gatecard .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .gatecard img{width:100%;display:block;border-radius:7px;background:#0b0f14}
+  .gatecard .cap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;margin-top:8px;color:var(--dim)}
+  .callout{position:absolute;right:-1px;top:-13px;background:var(--bg);border:1px solid var(--line);
+    border-radius:6px;padding:3px 9px;font-family:var(--mono);font-size:11px;color:var(--accent)}
+
+  /* generic image card */
+  .shot{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .shot img{width:100%;display:block;background:#0b0f14}
+  .shot .m{padding:12px 14px;font-size:13.5px;color:var(--dim)}
+  .shot .m b{color:var(--ink);font-weight:600}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  h2.sec{font-size:clamp(26px,4vw,38px);margin:0 0 8px}
+  .sec-lead{margin:0 0 34px}
+
+  /* AGENT BOARD */
+  .board{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:18px 18px 22px;margin-top:8px}
+  .board-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+  .board-head .spec{font-family:var(--mono);font-size:13px;color:var(--dim)}
+  .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:720px){.cols{grid-template-columns:1fr 1fr}}
+  .col{min-height:150px}
+  .col h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+    margin:0 0 10px;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+  .agents{position:relative}
+  .agent{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:8px;padding:9px 11px;margin-bottom:10px;transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .4s;
+    will-change:transform}
+  .agent .an{font-family:var(--mono);font-size:13px;font-weight:600}
+  .agent .as{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:3px}
+  .agent[data-state="verifying"]{border-left-color:var(--warn)}
+  .agent[data-state="pass"]{border-left-color:var(--pass)}
+  .agent[data-state="win"]{border-left-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .agent .tag{font-family:var(--mono);font-size:10.5px}
+  .replay{margin-top:14px;display:flex;gap:14px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--dim)}
+  .replay button{font-family:var(--mono);font-size:12px;background:var(--surface);border:1px solid var(--line);
+    color:var(--ink);border-radius:7px;padding:6px 11px;cursor:pointer}
+
+  /* spec sheet table */
+  table.spec{width:100%;border-collapse:collapse;font-size:14.5px}
+  table.spec th,table.spec td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.spec thead th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+  table.spec .today{color:var(--ink)} table.spec .next{color:var(--dim)}
+  table.spec tbody td:first-child{border-right:1px solid var(--line)}
+
+  /* video */
+  .video{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .video video{width:100%;display:block;background:#000}
+
+  footer{border-top:1px solid var(--line);padding:34px 0 60px;color:var(--dim);font-size:13.5px}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+  .kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--dim)}
+  .honest{font-size:13px;color:var(--dim);max-width:70ch;border-left:2px solid var(--line);padding-left:14px;margin-top:26px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand">Part<span class="tick">smith</span></div>
+  <nav class="nav">
+    <a class="hide-sm" href="#gate">The gate</a>
+    <a class="hide-sm" href="#race">The race</a>
+    <a class="hide-sm" href="#see">See it</a>
+    <a href="#demo">Demo</a>
+    <a href="https://github.com/evnchn/partsmith">Repo ↗</a>
+    <button class="toggle" id="themeBtn" aria-label="Toggle colour theme">◐ theme</button>
+  </nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">Agentic 3D-modeling factory · RAISE Summit 2026 · Cursor track</div>
+      <h1>Partsmith</h1>
+      <p class="thesis">Physics-verified generative CAD — where the AI <span class="accent">can't hand you a part that fails.</span></p>
+      <p class="sub">Describe a part. Claude&nbsp;Code agents forge it in <span class="num">build123d</span>. <b>Caliper</b> proves it prints — <em>measured, not eyeballed</em>. What comes out is provably printable, not a hopeful mesh.</p>
+      <div class="cta">
+        <a class="btn primary" href="#demo">▶ Watch the 60&#8209;second demo</a>
+        <a class="btn" href="https://github.com/evnchn/partsmith">View the repo ↗</a>
+      </div>
+    </div>
+    <div class="gatecard">
+      <span class="callout">overhang · measured per face</span>
+      <div class="pair">
+        <img src="assets/heatmap_good.png" alt="Overhang heatmap: the clip in its print orientation, entirely green — prints support-free.">
+        <img src="assets/heatmap_bad.png" alt="Overhang heatmap: the same clip tipped 90°, downward faces glowing red — would need support.">
+      </div>
+      <div class="cap"><span class="pass">■ prints support-free</span><span class="fail">tipped → overhang ■</span></div>
+    </div>
+  </div>
+</div></section>
+
+<div class="wrap"><p class="dim-rule">A part isn't done when it looks right</p></div>
+
+<section id="gate"><div class="wrap">
+  <h2 class="sec">It's done when it <span class="pass">passes</span>.</h2>
+  <p class="lead sec-lead">Generative tools happily hand you a mesh. Caliper won't ship one until it clears a suite of checks measured off the real geometry — <span class="num">overhang</span>, <span class="num">wall</span>, real-world <span class="num">fit</span>, build&#8209;plate. A failing check <em>names</em> the defect; the loop repairs exactly that and re-checks until every line is green.</p>
+  <div class="grid2">
+    <div class="shot">
+      <img src="assets/repair_before.png" alt="Attester output: FAIL — three checks red: bbox_x 66 exceeds 60, shelf clearance 0.025 too tight, cable clearance 0.050 too small.">
+      <div class="m"><b class="fail">FAIL</b> — three checks red. The gate names each defect: too big for the plate, slot too tight, bore too small.</div>
+    </div>
+    <div class="shot">
+      <img src="assets/repair_after.png" alt="Attester output: PASS — all checks green after the repair loop fixes each named defect.">
+      <div class="m"><b class="pass">PASS</b> — two repair rounds later, every check green. The tests are the objective; the loop optimizes to the leanest part that still passes.</div>
+    </div>
+  </div>
+</div></section>
+
+<section id="race" style="padding-top:20px"><div class="wrap">
+  <h2 class="sec">One spec. Three agents. Caliper judges.</h2>
+  <p class="lead sec-lead">Hand the same brief to three Claude&nbsp;Code agents and they solve it three different ways. Caliper scores all three against the same checks and ranks by material — the leanest design that <em>actually passes</em> wins.</p>
+  <div class="board" id="board">
+    <div class="board-head">
+      <span class="spec">spec ▸ “a clip for a 6&nbsp;mm cable that grips a 22&nbsp;mm shelf lip, support-free”</span>
+      <span class="spec accent" id="verdict">running…</span>
+    </div>
+    <div class="cols">
+      <div class="col"><h4>Spec</h4><div class="agents" data-col="spec" id="c-spec"></div></div>
+      <div class="col"><h4>Designing</h4><div class="agents" data-col="design" id="c-design"></div></div>
+      <div class="col"><h4>Verifying</h4><div class="agents" data-col="verify" id="c-verify"></div></div>
+      <div class="col"><h4>Ranked ★</h4><div class="agents" data-col="ranked" id="c-ranked"></div></div>
+    </div>
+    <div class="replay">
+      <button id="replayBtn">↻ replay the race</button>
+      <span>winner: <b class="accent num">minimal · 131&nbsp;mm³</b> — <span class="num">80×</span> leaner than a naïve solid block, all seven checks green.</span>
+    </div>
+  </div>
+  <div class="shot" style="margin-top:22px">
+    <img src="assets/leaderboard.png" alt="Race leaderboard: reference block 10519 mm³, hook-over-lip 374 mm³, C-clamp 215 mm³, minimal clip (winner) 131 mm³ / 80× leaner — all four PASS.">
+    <div class="m">Every design is a module exposing the same <span class="num">make / probes</span> contract, so Caliper never knows <em>which</em> part it's judging — it just measures.</div>
+  </div>
+</div></section>
+
+<div class="wrap"><p class="dim-rule">Numbers gate. Pictures inform.</p></div>
+
+<section id="see"><div class="wrap">
+  <h2 class="sec">See it, don't just measure it.</h2>
+  <p class="lead sec-lead">A scalar says <span class="num">max_overhang = 0°</span>. A picture says <em>where</em>. Caliper renders its analysis as fields an agent's vision encoder reads in one glance — turning a pass/fail number into a spatial instruction for the next redesign.</p>
+  <div class="grid3">
+    <div class="shot">
+      <img src="assets/orientation.png" alt="Orientation contact sheet: twelve build orientations, each a small overhang heatmap with support numbers; the upright pose starred as best.">
+      <div class="m"><b>Orientation search.</b> Twelve poses scored for support; the agent glances and picks the printable one. ★ = least support.</div>
+    </div>
+    <div class="shot">
+      <img src="assets/tipover_stable.png" alt="Top-down stability plan: centre-of-mass dot inside the green support polygon — stable.">
+      <div class="m"><b class="pass">Stable.</b> Centre of mass inside the support footprint — it won't topple.</div>
+    </div>
+    <div class="shot">
+      <img src="assets/tipover_topple.png" alt="Top-down stability plan: tipped part, centre-of-mass off the pivot line — topples.">
+      <div class="m"><b class="fail">Topples.</b> Same part tipped — CoM off the base. The image carries what a bounding box can't.</div>
+    </div>
+  </div>
+</div></section>
+
+<section id="road" style="padding-top:24px"><div class="wrap">
+  <h2 class="sec">Proven today. Building next.</h2>
+  <p class="lead sec-lead">Geometry is the gate we've shipped. Physics is the gate we're building — the same architecture, richer fields. This is the trajectory, stated plainly.</p>
+  <div class="shot" style="overflow-x:auto">
+  <table class="spec">
+    <thead><tr><th>✅ Proven today · runs green in the repo</th><th>🔜 Building next · same architecture</th></tr></thead>
+    <tbody>
+      <tr><td class="today">Caliper gates generated parts on real geometry — overhang, wall, fit, plate</td><td class="next">Structural &amp; flow verification (FEA / CFD) — the same gate, physics fields</td></tr>
+      <tr><td class="today">Red→green auto-repair; optimize to the leanest passing part</td><td class="next">Live agent-in-the-loop generation — the race wired continuously</td></tr>
+      <tr><td class="today">Three agents race one spec; Caliper ranks the winner</td><td class="next">Agent-readable heat-map fields driving the redesign directly</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div></section>
+
+<section id="demo" style="padding-top:24px"><div class="wrap">
+  <h2 class="sec">The 60 seconds.</h2>
+  <p class="lead sec-lead">The whole loop, honest and end-to-end — a broken clip repaired red→green, the optimizer cutting material a third while every check holds, three agents raced, a verified part and its measured passport.</p>
+  <div class="video">
+    <video controls preload="none" poster="assets/poster.png">
+      <source src="assets/demo.mp4" type="video/mp4">
+      Your browser can't play the video — <a href="assets/demo.mp4">download it</a>.
+    </video>
+  </div>
+  <p class="honest"><b>Honest scope.</b> Caliper is a <em>geometric</em> printability &amp; fit gate — the proven first pillar of a physics stack, not a claim of physical-function proof. Clearance is exact (OpenCascade); overhang is a per-face angle; min-wall is a sampled ray-cast, stable across 400→20&nbsp;000 samples. Retention and FEA/CFD are roadmap. Full methodology &amp; limitations live in the <a href="https://github.com/evnchn/partsmith#readme">repo README</a> — where the number stays the incorruptible gate and the picture stays advisory.</p>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div>Built clean-room during <b>RAISE Summit Hackathon 2026</b> · Cursor track · <a href="https://github.com/evnchn/partsmith">github.com/evnchn/partsmith</a> · MIT</div>
+  <div>Part<span class="accent">smith</span> = the factory · <b>Caliper</b> = the gate · press <span class="kbd">T</span> for theme</div>
+</div></footer>
+
+<script>
+(function(){
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function set(t){root.setAttribute('data-theme',t);try{localStorage.setItem('ps-theme',t)}catch(e){}}
+  try{var s=localStorage.getItem('ps-theme');if(s)set(s);}catch(e){}
+  function toggle(){var cur=root.getAttribute('data-theme');
+    if(!cur)cur=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+    set(cur==='dark'?'light':'dark');}
+  btn.addEventListener('click',toggle);
+  addEventListener('keydown',function(e){if((e.key==='t'||e.key==='T')&&!/input|textarea/i.test(e.target.tagName))toggle();});
+
+  // ---- agent-board race animation ----
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var AGENTS=[
+    {id:'cclamp',name:'C-clamp',approach:'lateral grip',mat:215},
+    {id:'hook',name:'Hook-over-lip',approach:'drapes the lip',mat:374},
+    {id:'mini',name:'Minimal',approach:'twin-wall + collar',mat:131}
+  ];
+  var cols={spec:document.getElementById('c-spec'),design:document.getElementById('c-design'),
+    verify:document.getElementById('c-verify'),ranked:document.getElementById('c-ranked')};
+  var verdict=document.getElementById('verdict');
+  function card(a){var d=document.createElement('div');d.className='agent';d.id='ag-'+a.id;
+    d.innerHTML='<div class="an">'+a.name+'</div><div class="as">'+a.approach+'</div>';return d;}
+  function reset(){for(var k in cols)cols[k].innerHTML='';AGENTS.forEach(function(a){cols.spec.appendChild(card(a));});
+    verdict.textContent='running…';verdict.className='spec accent';}
+  function move(a,col,state,sub){var el=document.getElementById('ag-'+a.id);if(!el)return;
+    cols[col].appendChild(el);if(state)el.setAttribute('data-state',state);
+    if(sub)el.querySelector('.as').innerHTML=sub;}
+  function run(){reset();if(reduce){
+      move(AGENTS[0],'verify','pass');move(AGENTS[1],'verify','pass');
+      move({id:'mini'},'ranked','win','131 mm³ · 80× · <span class="pass">★ PASS</span>');
+      cols.ranked.insertBefore(document.getElementById('ag-mini'),cols.ranked.firstChild);
+      verdict.textContent='minimal wins · 131 mm³';verdict.className='spec pass';return;}
+    var t=350;
+    AGENTS.forEach(function(a,i){setTimeout(function(){move(a,'design',null,'writing build123d…');},t+i*260);});
+    AGENTS.forEach(function(a,i){setTimeout(function(){move(a,'verify','verifying','Caliper measuring…');},t+900+i*300);});
+    AGENTS.forEach(function(a,i){setTimeout(function(){move(a,'verify','pass',a.mat+' mm³ · <span class="pass">PASS</span>');},t+2000+i*320);});
+    setTimeout(function(){
+      var order=[{id:'mini',mat:131,f:'80×',win:1},{id:'cclamp',mat:215,f:'49×'},{id:'hook',mat:374,f:'28×'}];
+      order.forEach(function(o,i){setTimeout(function(){
+        move({id:o.id},'ranked',o.win?'win':'pass',o.mat+' mm³ · '+o.f+(o.win?' · <span class="pass">★ WINNER</span>':' leaner'));
+      },i*230);});
+      verdict.textContent='minimal wins · 131 mm³ · 80× leaner';verdict.className='spec pass';
+    },t+3300);
+  }
+  reset();  // populate the Spec column on load so the board is never blank
+  var ran=false;
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&!ran){ran=true;run();}});},{threshold:.35});
+  io.observe(document.getElementById('board'));
+  document.getElementById('replayBtn').addEventListener('click',run);
+})();
+</script>
+</body>
+</html>
