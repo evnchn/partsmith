@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+*.stl
+*.3mf
+*.step
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+# generated candidates + artifacts kept out of history unless promoted
+parts/_candidates/
+artifacts/
+!parts/cable_clip.py
