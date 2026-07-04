@@ -1,12 +1,13 @@
 # Architecture — build contract (for humans and build-subagents)
 
 Clean-room, built during RAISE 2026. Compute = Claude Code (subagents), **no `claude -p`**.
-Star = the **factory** (optimizer). `pytest`-for-3D = the **objective** that makes the loop real.
+Star = **Partsmith** (the factory/optimizer). **Caliper** (`caliper/`) = the verification engine,
+the **objective** that makes the loop real. (Original build contract; all modules now built.)
 
 ## Module map + contracts
 
 ```
-atoms/
+caliper/   # Partsmith Caliper — the verification engine
   spec.py      [DONE]  PartSpec + Interface + NOZZLE/LAYER/OVERHANG constants. The objective, typed.
   measure.py   [TODO]  Geometry queries over a build123d Part/Solid. THE HARD, DEFENSIBLE CORE.
                        Contract — each returns a real number, no eyeballing:

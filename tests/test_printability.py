@@ -1,11 +1,11 @@
 """The printability suite = the objective, parametrized off the spec.
 
-One `assert` per printability property, each measured from real build123d geometry via atoms.measure.
+One `assert` per printability property, each measured from real build123d geometry via caliper.measure.
 Every constraint in the spec maps to exactly one assertion here — that is the discipline that keeps
 the optimization loop honest (README: "the tests are the loss function").
 """
-from atoms import measure
-from atoms.spec import OVERHANG_LIMIT_DEG
+from caliper import measure
+from caliper.spec import OVERHANG_LIMIT_DEG
 from parts import cable_clip
 
 
@@ -45,5 +45,5 @@ def test_cable_clearance(part, spec, params):
 
 # NOTE: retention (does the cable HOLD?) is deliberately NOT gated here. This reference clip is a
 # slip-fit guide, so there is no real retention force to measure — a snap/interference feature would
-# be needed. We don't fake the number. See atoms.measure.retention_N (roadmap) and README "Honest
+# be needed. We don't fake the number. See caliper.measure.retention_N (roadmap) and README "Honest
 # scope". Knowing the difference between a measurement and an unmodelled force is the whole point.

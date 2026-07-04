@@ -1,4 +1,4 @@
-"""Hook-over-lip cable bracket — a DISTINCT design for `atoms.spec.CABLE_CLIP`.
+"""Hook-over-lip cable bracket — a DISTINCT design for `caliper.spec.CABLE_CLIP`.
 
 Where the reference `cable_clip` cuts a fully-*enclosed* vertical slot through a solid box, this
 part is an **open hook**: an inverted-U / C-clamp that drapes over the edge of the shelf lip and

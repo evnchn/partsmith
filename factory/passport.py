@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import os
 
-from atoms import measure
+from caliper import measure
 
 
 def write_passport(part, spec, result, outdir: str = "artifacts", name: str | None = None) -> str:

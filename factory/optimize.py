@@ -9,14 +9,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from atoms.attest import run_suite
+from caliper.attest import run_suite
 from parts import cable_clip
 
 
 @dataclass
 class Candidate:
     params: dict
-    result: object  # atoms.attest.AttestResult
+    result: object  # caliper.attest.AttestResult
 
     @property
     def score(self) -> float:

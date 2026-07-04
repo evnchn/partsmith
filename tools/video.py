@@ -31,8 +31,8 @@ TMP = "artifacts/_video_tmp"
 
 def passport():
     """Manufacturing passport for the race winner (parts/mini_clip), real attester rows."""
-    from atoms.spec import CABLE_CLIP
-    from atoms.attest import run_suite
+    from caliper.spec import CABLE_CLIP
+    from caliper.attest import run_suite
     import parts.mini_clip as m
 
     p = m.DEFAULT
@@ -59,7 +59,7 @@ def passport():
 def leaderboard():
     """Clean 2x2 leaderboard from the real race renders + real material numbers."""
     from demo.race import attest_module
-    from atoms.spec import CABLE_CLIP
+    from caliper.spec import CABLE_CLIP
 
     # (module, render png, pretty name, subtitle)
     order = [

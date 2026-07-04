@@ -6,8 +6,8 @@ suite is green. Run from the repo root:  `python -m demo.repair_demo`
 """
 from __future__ import annotations
 
-from atoms.attest import run_suite
-from atoms.spec import CABLE_CLIP
+from caliper.attest import run_suite
+from caliper.spec import CABLE_CLIP
 from factory.generate import RepairGenerator
 from parts import cable_clip
 

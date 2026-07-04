@@ -5,7 +5,7 @@ visible on camera. Run from the repo root:  `python -m demo.run_demo`
 """
 from __future__ import annotations
 
-from atoms.spec import CABLE_CLIP
+from caliper.spec import CABLE_CLIP
 from factory.generate import ParametricGenerator
 from factory.optimize import optimize
 from factory.passport import write_passport

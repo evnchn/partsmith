@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from importlib import import_module
 
-from atoms.attest import run_suite
-from atoms.measure import material_mm3
-from atoms.spec import CABLE_CLIP
+from caliper.attest import run_suite
+from caliper.measure import material_mm3
+from caliper.spec import CABLE_CLIP
 
 # reference block first, then the three agent-authored designs
 CANDIDATES = ["cable_clip", "cclamp_clip", "hook_clip", "mini_clip"]

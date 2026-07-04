@@ -1,7 +1,7 @@
 [project]
-name = "pytest-for-atoms"
+name = "partsmith"
 version = "0.1.0"
-description = "Agentic 3D-modeling factory: NL spec -> build123d part optimized to pass a pytest-style printability suite."
+description = "Partsmith — an agentic 3D-modeling factory; parts ship only when Partsmith Caliper verifies them printable."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 dependencies = [
@@ -20,7 +20,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["atoms", "factory"]
+packages = ["caliper", "factory"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

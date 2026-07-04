@@ -37,7 +37,7 @@ DEFAULT: dict = {
     "bore_r": 3.25,      # 6 mm cable → radius 3.0 + 0.25 mm radial clearance
     "bore_x": 14.0,      # X of bore centre (offset +X, away from the slot)
 
-    # retention proxy tuning (see atoms.measure.retention_N — engineering estimate)
+    # retention proxy tuning (see caliper.measure.retention_N — engineering estimate)
     "pinch_mm": 0.15,    # assumed elastic pinch/interference the flexing wall sees
     "mu": 0.4,           # PLA-on-cable friction coefficient
 }
