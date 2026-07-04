@@ -10,6 +10,15 @@ against, which turns generative CAD from a dice-roll into an engineering loop.
 
 Built **entirely during the RAISE Summit Hackathon 2026** (Cursor track), clean-room. 🇫🇷
 
+<p align="center">
+  <img src="docs/assets/heatmap_good.png" width="45%" alt="Overhang heatmap: the clip in print orientation, all green — prints support-free.">
+  &nbsp;
+  <img src="docs/assets/heatmap_bad.png" width="45%" alt="The same clip tipped 90 degrees, downward faces glowing red — would need support.">
+</p>
+<p align="center"><sub><b>Caliper's overhang analysis, rendered.</b> Green prints support-free; tipped, the downward faces glow red. Measured, not eyeballed.</sub></p>
+
+**[▶ 60-second demo](artifacts/partsmith_demo.mp4) · project site: [`docs/index.html`](docs/index.html) · [how it works ↓](#the-loop)**
+
 ## The family
 
 Partsmith is a small platform, not a monolith:
@@ -75,17 +84,8 @@ def check(part, spec):                              # every number MEASURED from
 
 Exact B-rep distance (OpenCascade), tessellated-mesh ray-casting, face-normal overhang — each check
 run against a **real-world probe** (a fixed 22 mm shelf, a 6 mm cable), not a value derived from the
-part's own parameters. A too-tight slot *fails*.
-
-**What each check is (no overclaiming):** clearance is *exact* (OpenCascade distance); overhang is a
-per-face **normal proxy**; min-wall is a **sampled** inward ray-cast on the watertight mesh — stable
-across 400→20 000 samples (`python -m demo.min_wall_convergence`), a solid heuristic, not a certified
-gauge. The exported STL is checked **watertight / slicable** in the passport. These are geometric
-printability + fit checks — not a claim of physical function.
-
-> **Honest scope.** Retention ("does it *hold*?") is **not** gated: the reference clip is a slip-fit
-> guide with no interference, so there's no real force to measure — and Partsmith won't fake one. It's
-> on the roadmap behind a snap-fit part. Knowing a measurement from an unmodelled force is the point.
+part's own parameters. A too-tight slot *fails*. *(Full methodology & honest limitations: the
+[appendix](#methodology--limitations) below.)*
 
 ## The agentic race
 
@@ -98,6 +98,8 @@ Caliper judges them all — `python -m demo.race`:
 | C-clamp — lateral grip | ✅ PASS | 215 mm³ | 49× |
 | hook-over-lip | ✅ PASS | 374 mm³ | 28× |
 | reference block (naive) | ✅ PASS | 10 519 mm³ | 1× |
+
+<p align="center"><img src="docs/assets/leaderboard.png" width="82%" alt="Race leaderboard: reference block 10519 mm3, hook-over-lip 374, C-clamp 215, minimal clip 131 (winner, 80x leaner) — all four PASS."></p>
 
 Same seven checks green on every one — Caliper just ranks by material. Along the way it caught the
 minimal design's collar feathering to a **0.013 mm wall** (min-wall fail); the agent fixed it with a
@@ -112,6 +114,17 @@ The checks bite, and the agent responds. Each design is a `parts/*.py` module ex
 > (`ParametricGenerator`); wiring a Claude Code agent as the in-loop generator (`AgentGenerator`, a
 > documented hook in `factory/generate.py`) is the next integration, not something this repo claims to
 > already do at runtime.
+
+## See it, don't just measure it
+
+A scalar says `max_overhang = 0°`. A picture says *where*. Caliper renders its analysis as fields an
+agent's vision encoder reads in one glance — turning a pass/fail number into a spatial redesign cue.
+
+<p align="center"><img src="docs/assets/orientation.png" width="82%" alt="Orientation contact sheet: twelve build orientations scored for support material, the printable pose starred."></p>
+
+Twelve orientations scored for support; the agent glances at the sheet and picks the printable pose
+(★ = least support). Plus wall-thickness, clearance/interference, and centre-of-mass tip-over maps —
+see [`tools/`](tools). *The number stays the gate; the picture is advisory.*
 
 ## Run it
 
@@ -131,6 +144,27 @@ Built live during the hackathon. **Done:** Partsmith Caliper (7 real checks, par
 optimizer (checks as loss function), red→green auto-repair, and the 3-agent race. **Roadmap:**
 Partsmith Tricks (certified gallery), a snap-fit part type (which makes retention a real check), and
 real-print capture.
+
+## Methodology & limitations
+
+Honest about exactly what Caliper measures and what it doesn't — a verification tool that overclaims
+is a contradiction.
+
+- **Clearance — exact.** Minimum solid-to-solid distance via OpenCascade `BRepExtrema`, against a
+  *real-world* probe (a fixed 22 mm shelf, a 6 mm cable), not a value derived from the part.
+- **Overhang — a per-face normal proxy.** Face-normal angle vs. the build plate, bed faces excluded.
+  Answers the support-free question; not a slicer-grade bridging/island analysis.
+- **Min-wall — a *sampled* inward ray-cast** on the watertight mesh; stable across 400→20 000 samples
+  (`python -m demo.min_wall_convergence` — evidence, not a claim), but a heuristic, not a certified gauge.
+- **Watertight / slicable** — the exported STL is verified manifold in the passport.
+- **Retention is *not* gated.** A slip-fit guide has no real grip force to measure, and Partsmith
+  won't fake one — roadmap behind a snap-fit part.
+- **These are geometric printability + fit checks** — the proven first pillar of a physics stack, not
+  a claim of physical-function proof. Structural/flow verification (FEA/CFD) is the trajectory.
+
+On the visual fields: **the number is the incorruptible gate; the picture is advisory.** An optimizer
+rewarded on "make the image greener" would game the colormap — so the scalar assertion stays the thing
+that isn't allowed to lie.
 
 ## License
 
