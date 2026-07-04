@@ -64,8 +64,9 @@ def _repair_panel(name, title_txt, rows, title_color):
             fontweight="bold", **MONO)
     y = 0.72
     for label, ok, val, target in rows:
-        mark, col = ("✅", GREEN) if ok else ("❌", RED)
-        ax.text(0.10, y, mark, fontsize=20, ha="left", va="center")
+        mark, col = ("✓", GREEN) if ok else ("✗", RED)
+        ax.text(0.10, y, mark, color=col, fontsize=22, ha="left", va="center",
+                fontweight="bold", **MONO)
         ax.text(0.16, y, f"{label:<20}", color=FG, fontsize=19, ha="left", va="center", **MONO)
         ax.text(0.62, y, f"{val:>8}", color=col, fontsize=19, ha="left", va="center", **MONO)
         ax.text(0.80, y, target, color=DIM, fontsize=16, ha="left", va="center", **MONO)
