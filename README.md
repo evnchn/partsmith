@@ -17,7 +17,7 @@ Built **entirely during the RAISE Summit Hackathon 2026** (Cursor track), clean-
 </p>
 <p align="center"><sub><b>Caliper's overhang analysis, rendered.</b> Green prints support-free; tipped, the downward faces glow red. Measured, not eyeballed.</sub></p>
 
-**[▶ 60-second demo](artifacts/partsmith_demo.mp4) · project site: [`docs/index.html`](docs/index.html) · [how it works ↓](#the-loop)**
+**[▶ 60-second demo](docs/assets/demo.mp4) · project site: [`docs/index.html`](docs/index.html) · [how it works ↓](#the-loop)**
 
 ## The family
 

@@ -29,7 +29,7 @@ poster = data_uri("assets/poster.png")
 video_block = re.search(r'<div class="video">.*?</div>', html, re.S).group(0)
 replacement = (
     '<a class="video" style="display:block" '
-    'href="https://github.com/evnchn/partsmith/raw/main/artifacts/partsmith_demo.mp4">'
+    'href="https://github.com/evnchn/partsmith/raw/main/docs/assets/demo.mp4">'
     f'<img src="{poster}" alt="Partsmith 60-second demo — click to watch" style="width:100%;display:block"></a>'
 )
 html = html.replace(video_block, replacement)
