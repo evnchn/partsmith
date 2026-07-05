@@ -18,7 +18,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.image as mpimg  # noqa: E402
 
-from tools.frames import BG, FG, DIM, CYAN, GREEN, RED, MONO, _canvas, _save, W, H  # noqa: E402
+from tools.frames import (  # noqa: E402
+    BG, FG, DIM, CYAN, GREEN, RED, MONO, _canvas, _save, W, H, cold_open_caption)
 
 OUT = "artifacts"
 FFMPEG = "/opt/homebrew/bin/ffmpeg"
@@ -103,13 +104,14 @@ def leaderboard():
 # Honest against demo/race.py + demo/repair_demo.py output (all 4 designs PASS; winner=mini_clip,
 # 80.6× leaner; optimize 13,149 -> 8,654 = -34% material). No "it rejects" claim — nothing rejects.
 NARRATION = {
-    1: "This is Partsmith — an agentic 3D-modeling factory. Describe a part, and it forges one "
-       "that's verified printable.",
-    2: "You describe a part in plain language; Claude Code agents write the CAD in build123d. But "
-       "generating a shape is easy — the real question is: does it fit, print, and hold?",
-    3: "So Partsmith Caliper measures it — overhang, wall thickness, real-world fit, every check a "
-       "number from the geometry. Here a broken clip fails three checks; the loop reads each "
-       "failure, fixes exactly that, and re-checks until every one is green.",
+    0: "One sentence, and this part exists — a hundred and thirty-one cubic millimetres, eighty "
+       "times leaner than a solid block, every check green.",
+    1: "This is Partsmith — the printability gate for generative CAD.",
+    2: "You describe a part; Claude Code agents write the CAD in build123d. Generating a shape is "
+       "easy — the hard part: does it fit, and does it print?",
+    3: "So Caliper measures it — overhang, wall thickness, fit — every check a number from the "
+       "geometry. A broken clip fails three checks; the loop reads each failure, fixes it, and "
+       "re-checks until every one is green.",
     4: "The checks aren't just a gate — they're the optimization target. Partsmith keeps "
        "searching, cutting material by a third while every check stays green.",
     5: "Give the same spec to three agents and they solve it three different ways. Caliper judges "
@@ -121,6 +123,7 @@ NARRATION = {
 
 # each beat -> list of (visual asset, fraction of the beat's screen time)
 VISUALS = {
+    0: [("winner_turntable.gif", 1.0)],  # cold-open: the gasp, with a burned-in caption
     1: [("title.png", 1.0)],
     2: [("spec_agents.png", 1.0)],
     3: [("repair_before.png", 0.45), ("repair_after.png", 0.55)],
@@ -130,7 +133,7 @@ VISUALS = {
     7: [("close.png", 1.0)],
 }
 
-PAD = 0.4      # seconds of tail silence after each VO line
+PAD = 0.3      # seconds of tail silence after each VO line
 MIN_SEG = 3.0  # floor on any beat's duration
 FPS = 30
 
@@ -160,13 +163,25 @@ def _gif_segment(gif, dur, out):
           "-vf", VF, "-r", str(FPS), "-c:v", "libx264", "-pix_fmt", "yuv420p", out])
 
 
+def _gif_caption_segment(gif, caption_png, dur, out):
+    """Looped GIF scaled/padded to 1280x720 with a full-frame transparent caption PNG overlaid."""
+    fc = ("[0:v]scale=1280:720:force_original_aspect_ratio=decrease,"
+          "pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=0x0b0f14,setsar=1[bg];"
+          "[bg][1:v]overlay=0:0,format=yuv420p[v]")
+    _run([FFMPEG, "-y", "-stream_loop", "-1", "-t", f"{dur:.3f}", "-i", gif, "-i", caption_png,
+          "-filter_complex", fc, "-map", "[v]", "-r", str(FPS),
+          "-c:v", "libx264", "-pix_fmt", "yuv420p", out])
+
+
 def build():
     os.makedirs(TMP, exist_ok=True)
     print("passport ->", passport())
     print("leaderboard ->", leaderboard())
+    caption_png = cold_open_caption()
+    print("cold-open caption ->", caption_png)
 
     video_parts, audio_parts, timing = [], [], []
-    for beat in range(1, 8):
+    for beat in range(0, 8):
         aiff = os.path.join(TMP, f"beat{beat}.aiff")
         subprocess.run(["say", "-v", VOICE, "-o", aiff, NARRATION[beat]], check=True)
         vo = _dur(aiff)
@@ -185,7 +200,9 @@ def build():
             sub_dur = seg * frac if j < len(subs) - 1 else seg - sum(seg * f for _, f in subs[:-1])
             src = os.path.join(OUT, asset)
             outv = os.path.join(TMP, f"seg{beat}_{j}.mp4")
-            if asset.endswith(".gif"):
+            if beat == 0 and asset.endswith(".gif"):
+                _gif_caption_segment(src, caption_png, sub_dur, outv)
+            elif asset.endswith(".gif"):
                 _gif_segment(src, sub_dur, outv)
             else:
                 _still_segment(src, sub_dur, outv)

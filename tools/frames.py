@@ -41,10 +41,29 @@ def title():
     fig, ax = _canvas()
     ax.text(0.5, 0.60, "Partsmith", color=CYAN, fontsize=54, ha="center", va="center",
             fontweight="bold", **MONO)
-    ax.text(0.5, 0.44, "an agentic 3D-modeling factory", color=FG, fontsize=22, ha="center")
+    ax.text(0.5, 0.44, "the printability gate for generative CAD", color=FG, fontsize=22, ha="center")
     ax.text(0.5, 0.34, "a part ships only when it passes its own printability tests", color=DIM,
             fontsize=16, ha="center")
     return _save(fig, "title.png")
+
+
+def cold_open_caption():
+    """Transparent lower-third caption burned over the winner turntable for the cold-open (beat 0).
+
+    Numbers match demo/race.py: mini_clip = 131 mm³, 80.6× leaner than the reference block,
+    all 7 assertions green.
+    """
+    fig = plt.figure(figsize=(W / 160, H / 160), dpi=160)
+    fig.patch.set_alpha(0)
+    ax = fig.add_axes([0, 0, 1, 1]); ax.axis("off")
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.patch.set_alpha(0)
+    ax.add_patch(plt.Rectangle((0, 0.05), 1, 0.17, color=BG, alpha=0.72, zorder=1))
+    ax.text(0.5, 0.135, "131 mm³ · 80× leaner · 7/7 checks green", color=GREEN, fontsize=22,
+            ha="center", va="center", fontweight="bold", zorder=2, **MONO)
+    os.makedirs(OUT, exist_ok=True)
+    p = os.path.join(OUT, "cold_open_caption.png")
+    fig.savefig(p, transparent=True); plt.close(fig)
+    return p
 
 
 def spec_agents():
@@ -53,7 +72,7 @@ def spec_agents():
     ax.text(0.5, 0.66, '"a clip for a 6 mm cable that grips a 22 mm shelf lip,\nprints support-free"',
             color=FG, fontsize=22, ha="center", **MONO)
     ax.text(0.5, 0.42, "→ Claude Code agents write build123d", color=CYAN, fontsize=22, ha="center")
-    ax.text(0.5, 0.28, "generating a shape is easy.\ndoes it fit, print, and hold?", color=DIM,
+    ax.text(0.5, 0.28, "generating a shape is easy.\ndoes it fit, and does it print?", color=DIM,
             fontsize=18, ha="center")
     return _save(fig, "spec_agents.png")
 
@@ -106,5 +125,5 @@ def close():
 
 
 if __name__ == "__main__":
-    for p in [title(), spec_agents(), *repair_frames(), close()]:
+    for p in [title(), cold_open_caption(), spec_agents(), *repair_frames(), close()]:
         print("wrote", p)
