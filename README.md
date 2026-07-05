@@ -1,9 +1,11 @@
 # Partsmith
 
-**Agents that forge parts that fit.** Describe a part in plain language; Claude Code agents write
-[build123d](https://github.com/gumyr/build123d) to make it — and it **only ships once it clears
-Caliper's printability checks.** Verification isn't an afterthought: it's the **optimization target** the agents design
-against, which turns generative CAD from a dice-roll into an engineering loop.
+**The printability gate for generative CAD.** AI generates a 3D model in seconds — but can you
+*print* it? Partsmith's **Caliper** engine measures every generated part — overhang, wall thickness,
+real-world fit — in [build123d](https://github.com/gumyr/build123d), and ships it **only if it passes**,
+or **rejects it with the exact number**. The check that has to sit between *generate* and *print*.
+Claude Code agents make the parts; Caliper is the gate — and that gate is the **optimization target**
+they're driven toward, turning generative CAD from a dice-roll into an engineering loop.
 
 > Generating a mesh is easy. Generating one that **provably fits and passes the support-free check** is
 > the hard part. So Partsmith makes "will it print, and will it fit?" checkable — measured, not eyeballed.
