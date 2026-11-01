@@ -78,6 +78,9 @@ def clearance_mm(part, probe) -> float:
     """
     from OCP.BRepExtrema import BRepExtrema_DistShapeShape
 
+    common = part & probe  # None for disjoint Solid operands
+    if common is not None and common.volume > 1e-9:  # probe inside material: no boundary contact
+        return 0.0
     d = BRepExtrema_DistShapeShape(part.wrapped, probe.wrapped)
     return float(d.Value())
 
