@@ -46,27 +46,34 @@ def max_overhang_deg(part) -> float:
     Convention: vertical wall -> 0, horizontal ceiling -> 90, a 45deg facet -> 45. FDM needs
     support when this exceeds OVERHANG_LIMIT_DEG. Bed-contact faces are excluded (the first layer
     is not an overhang). Returns 0.0 if there are no downward faces above the bed.
+
+    A curved face (cylinder, sphere, fillet) has a different normal at every point, so the exact
+    surface normal is sampled at the face center AND at every vertex of its tessellation; one
+    center normal alone misses e.g. the underside of a lying cylinder.
     """
     zmin = part.bounding_box().min.Z
     worst = 0.0
     for face in part.faces():
+        pts = []
         try:
-            c = face.center()
-            n = face.normal_at(c)
+            pts.append(face.center())
+            pts += face.tessellate(0.1)[0]
         except Exception:
-            continue  # degenerate / unparametrised face — skip, don't fabricate
-        # normalise
-        mag = (n.X ** 2 + n.Y ** 2 + n.Z ** 2) ** 0.5
-        if mag == 0:
-            continue
-        nz = n.Z / mag
-        if nz >= -1e-6:
-            continue  # not a downward-facing face
-        if c.Z <= zmin + 1e-3:
-            continue  # resting on the bed — excluded
-        phi = degrees(acos(max(-1.0, min(1.0, -nz))))  # angle of normal below -Z
-        overhang = 90.0 - phi
-        worst = max(worst, overhang)
+            pass  # keep whatever samples we got — skip the rest, don't fabricate
+        # ponytail: vertex sampling can under-read a curved face's true worst angle by a few
+        # thousandths of a degree between vertices; refine near the 45deg cutoff if that matters.
+        for c in pts:
+            if c.Z <= zmin + 1e-3:
+                continue  # resting on the bed — excluded
+            try:
+                n = face.normal_at(c)
+            except Exception:
+                continue  # unparametrised point — skip, don't fabricate
+            mag = (n.X ** 2 + n.Y ** 2 + n.Z ** 2) ** 0.5
+            if mag == 0 or n.Z / mag >= -1e-6:
+                continue  # not downward-facing here
+            phi = degrees(acos(max(-1.0, min(1.0, -n.Z / mag))))  # angle of normal below -Z
+            worst = max(worst, 90.0 - phi)
     return float(worst)
 
 
